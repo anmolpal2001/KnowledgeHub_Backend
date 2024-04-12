@@ -216,7 +216,7 @@ const updateProfile = async (req, res) => {
     const files = req.files;
 
     if(files){
-      const file = req.files.profilePic;
+      const imageFile = req.files.imageFile;
       const fileName = `${studentId}_file_${Date.now()}`;
 
       if(fileName.endsWith(".jpg") || fileName.endsWith(".jpeg") || fileName.endsWith(".png")){
@@ -236,6 +236,7 @@ const updateProfile = async (req, res) => {
     await accountInfo.save();
     const updatedStudent = {
       highestQualification : student.highestQualification,
+      profilePic : accountInfo.profilePic,
     }
     return res.status(200).json({ message: "Profile updated successfully", updatedStudent });
   } catch (error) {
