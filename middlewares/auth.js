@@ -4,10 +4,9 @@ dotenv.config();
 
 const auth = async (req, res, next) => {
     try{
-        // const token = req.body.token || req.cookies.token || req.headers("Authorization").replace("Bearer ","");
-        const token = req.cookies.token || req.headers.authorization.split(" ")[1];
+        const token = req.body.token || req.cookies.token || req.headers.authorization.split(" ")[1];
         if(!token || token == undefined || token == "")
-        {
+        {z
             return res.status(401).json({
                 success : false,
                 message : "Token missing",
