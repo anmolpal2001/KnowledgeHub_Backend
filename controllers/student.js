@@ -214,16 +214,21 @@ const updateProfile = async (req, res) => {
     }
     
     const files = req.files;
+    console.log(files);
 
     if(files){
       const imageFile = req.files.imageFile;
-      const fileName = `${studentId}_file_${Date.now()}`;
+      console.log(imageFile);
+      const imageFileName = `${studentId}_file_${Date.now()}`;
+      const fileExtension = imageFile.name.split('.').pop().toLowerCase();
+      console.log(fileExtension);
 
-      if(fileName.endsWith(".jpg") || fileName.endsWith(".jpeg") || fileName.endsWith(".png")){
+      if(fileExtension === "jpg" || fileExtension === "jpeg" || fileExtension === "png"){
         const options = {
           folder : "profilePics",
+          public_id : imageFileName,
         }
-        const response = await cloudinary.v2.uploader.upload(file.tempFilePath, options);
+        const response = await cloudinary.v2.uploader.upload(imageFile.tempFilePath, options);
         accountInfo.profilePic = response.secure_url;
       }
       else{
