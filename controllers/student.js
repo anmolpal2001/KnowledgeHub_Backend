@@ -187,9 +187,10 @@ const cancelSession = async (req, res) => {
 
 const updateProfile = async (req, res) => {
   try {
-    const {name,email,password,highestQualification,profilePic} = req.body;
+    const {formData} = req.body;
+    const newData = JSON.parse(formData);
+    const { highestQualification, name, email, password } = newData;
     const studentId = req.user.id;
-    console.log(profilePic);
     const student = await Student.findOne({ accountDetails: studentId }).populate({
       path : "accountDetails",
       select : "-password",
@@ -197,7 +198,9 @@ const updateProfile = async (req, res) => {
     if (!student) {
       return res.status(404).json({ message: "Student not found" });
     }
+   if(highestQualification){
     student.highestQualification = highestQualification;
+   }
     const accountInfo = await User.findById(studentId);
     if(accountInfo.needProfileUpdate){
       accountInfo.needProfileUpdate = false;
@@ -217,7 +220,7 @@ const updateProfile = async (req, res) => {
     console.log(files);
 
     if(files){
-      const imageFile = req.files.imageFile;
+      const imageFile = req.files.file;
       console.log(imageFile);
       const imageFileName = `${studentId}_file_${Date.now()}`;
       const fileExtension = imageFile.name.split('.').pop().toLowerCase();
@@ -240,10 +243,11 @@ const updateProfile = async (req, res) => {
     await student.save();
     await accountInfo.save();
     const updatedStudent = {
-      highestQualification : student.highestQualification,
+      highestQualification : highestQualification ? highestQualification : student.highestQualification,
       profilePic : accountInfo.profilePic,
     }
     return res.status(200).json({ message: "Profile updated successfully", updatedStudent });
+
   } catch (error) {
     console.error("Error updating student profile:", error);
     return res.status(500).json({ message: "Internal server error" });

@@ -6,6 +6,7 @@ import mailSender from "../mail/mailSender.js";
 import bcrypt from "bcrypt";
 import User from "../models/User.js";
 import { sessionRejectEmail } from "../mail/templates/sessionRejectEmail.js";
+import cloudinary from 'cloudinary';
 
 
 const approveSession = async (req, res) => {
@@ -149,7 +150,9 @@ const getTeacherBookedSessions = async (req, res) => {
 
 const updateProfile = async (req, res) => {
   try {
-    const { name, email, password, subjectSpecialization, experience, educationQualification} = req.body;
+    const {formData} = req.body;
+    const newData = JSON.parse(formData);
+    const { name, email, password, subjectSpecialization, experience, educationQualification} = newData;
     const teacherId = req.user.id;
     const teacher = await Teacher.findOne({ accountDetails: teacherId }).populate({
       path: "accountDetails",
@@ -166,7 +169,6 @@ const updateProfile = async (req, res) => {
     }
     if(educationQualification){
     teacher.educationQualification = educationQualification;}
-    await teacher.save();
     const accountInfo = await User.findById(teacherId);
     if(name){
       accountInfo.name = name;
@@ -181,11 +183,37 @@ const updateProfile = async (req, res) => {
     if(accountInfo.needProfileUpdate){
       accountInfo.needProfileUpdate = false;
     }
+    
+    const files = req.files;
+    console.log(files);
+
+    if(files){
+      const imageFile = req.files.file;
+      console.log(imageFile);
+      const imageFileName = `${teacherId}_file_${Date.now()}`;
+      const fileExtension = imageFile.name.split('.').pop().toLowerCase();
+      console.log(fileExtension);
+
+      if(fileExtension === "jpg" || fileExtension === "jpeg" || fileExtension === "png"){
+        const options = {
+          folder : "profilePics",
+          public_id : imageFileName,
+        }
+        const response = await cloudinary.v2.uploader.upload(imageFile.tempFilePath, options);
+        accountInfo.profilePic = response.secure_url;
+    }
+    else{
+      return res.status(400).json({message : "Invalid file format"});
+    }
+  }
+    
+    await teacher.save();
     await accountInfo.save();
     const updatedTeacher = {
       educationQualification: teacher.educationQualification,
       subjectSpecialization: teacher.subjectSpecialization,
       experience: teacher.experience,
+      profilePic : accountInfo.profilePic,
     }
     return res.status(200).json({
       success : true,

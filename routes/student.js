@@ -11,7 +11,7 @@ router.get("/getInfo",auth,isStudent,getStudentInfo);
 // router.get("/getAvailableSlots",auth,isStudent,getAvailableSlots);
 router.get("/sessionRequestList",auth,isStudent,sessionRequestList); //done
 router.post("/cancelSession",auth,isStudent,cancelSession); //done
-router.put("/updateProfile",auth,isStudent,updateProfile);
+router.post("/updateProfile",auth,isStudent,updateProfile);
 router.get("/rejectedRequestsList",auth,isStudent,rejectedRequestsList);
 
 
